@@ -1,13 +1,10 @@
-﻿using System.IO;
+﻿using ApprovalTests;
+using ApprovalTests.Combinations;
+using ApprovalUtilities.Utilities;
 using System;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-
-using ApprovalTests;
-using ApprovalTests.Combinations;
-
-using ApprovalUtilities.Utilities;
-
 using Xunit;
 
 namespace USAddress.Tests
@@ -199,6 +196,7 @@ namespace USAddress.Tests
             var streetPatternMatch = streetPattern.Match("COUNTY ROAD F");
             Approvals.Verify(streetPatternMatch);
         }
+
         [Fact]
         public void VerifyAllSecondaryUnitPattern()
         {
@@ -311,6 +309,36 @@ namespace USAddress.Tests
         public void VerifyZipPattern()
         {
             Approvals.Verify(AddressParser.ZipPattern);
+        }
+
+        [Fact]
+        public void VerifyTwoBlockPattern_Street()
+        {
+            Assert.Equal("TEST", Parser.ParseAddressLine("100 TEST", false).Street);
+        }
+
+        [Fact]
+        public void VerifyTwoBlockPattern_Number()
+        {
+            Assert.Equal("100", Parser.ParseAddressLine("100 TEST", false).Number);
+        }
+
+        [Fact]
+        public void VerifyTwoBlockPattern_Suffix()
+        {
+            Assert.Equal("ST", Parser.ParseAddressLine("100 TEST", false).Suffix);
+        }
+
+        [Fact]
+        public void VerifyCheckForTwoBlockPattern_True()
+        {
+            Assert.True(Parser.CheckForTwoBlockPattern("100 TEST"));
+        }
+
+        [Fact]
+        public void VerifyCheckForTwoBlockPattern_False()
+        {
+            Assert.False(Parser.CheckForTwoBlockPattern("100 TEST DR"));
         }
     }
 }

@@ -922,6 +922,53 @@ namespace USAddress
             return ParseAddress(input, AddressRegex, normalize);
         }
 
+        public string AddStreetSuffix(string input)
+        {
+            bool missingStreetSuffix = true;
+
+            // now split on white space to break up the string in two parts
+            var splitEntries = input.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            foreach (var splitEntry in splitEntries)
+            {
+                // ensure a street suffix is not present in the split entries
+                if (StreetSuffixes.ContainsKey(splitEntry) == true || StreetSuffixes.ContainsValue(splitEntry) == true)
+                {
+                    // if an entry is found we can break, since this is not what we are looking to change
+                    missingStreetSuffix = false;
+                    break;
+                }
+            }
+
+            // after looking through the split entries and not find a suffix, add one
+            if (missingStreetSuffix == true)
+            {
+                input += " ST";
+            }
+
+            return input;
+        }
+
+        /// <summary>
+        /// Check to see if the input string is a two block pattern ex: 100 RIVER, 5005 KINGS, 8 HIGHLAND
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public bool CheckForTwoBlockPattern(string input)
+        {
+            bool isTwoBlockPattern = false;
+
+            // count the white space, if there is only one count of white space then
+            // the input is more than likly in the format: 100 RIVER
+            int whiteSpaceCount = input.Count(s => s == ' ');
+
+            if (whiteSpaceCount == 1)
+            {
+                isTwoBlockPattern = true;
+            }
+
+            return isTwoBlockPattern;
+        }
+
         /// <summary>
         /// Attempts to parse the given input as a US address.
         /// </summary>
@@ -946,6 +993,11 @@ namespace USAddress
             if (normalize)
             {
                 input = input.ToUpperInvariant();
+            }
+
+            if (!normalize && CheckForTwoBlockPattern(input) == true)
+            {
+                input = AddStreetSuffix(input);
             }
 
             var match = pattern.Match(input);
@@ -1227,7 +1279,5 @@ namespace USAddress
 
             return normalized;
         }
-
-   
     }
 }
